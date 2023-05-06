@@ -1,0 +1,42 @@
+html {
+    height: 100%;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+    margin: 0 10px;
+    font-family: sans-serif;
+}
+
+svg {
+    display: block;
+    width: 100%;
+    flex-grow: 1;
+}
+
+#note {
+    font-weight: bold;
+}
+
+#overlay {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    display: none;
+    background: white;
+    padding: 2%;
+}
+
+video {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    display: none;
+}
