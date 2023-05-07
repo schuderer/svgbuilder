@@ -1,22 +1,22 @@
-# Svg Builder
+# SVG Builder
 
 Create inceractive SVG models for lasercutting.
 
-Similar to OpenSCAD's customizer, but more flexible on the UI side (In my unbiased opinion :) ).
+Similar to OpenSCAD's customizer, but more flexible on the UI side (in my totally unbiased opinion :) ).
 
 # How to use
 
-Currently, it's probably easiest to look at the catapult example and adapt it. See index.html, js/catapult.js and js/catapult.css.
+Currently, it's probably easiest to look at the catapult example and adapt it. See `index.html`, `js/catapult.js` and `js/catapult.css`.
 
-To handle the different aspects of your interactive SVG model, Svg Builder offers these ES6 modules:
- - svgbuilder.js   -- (re)creating your parametrized SVG design
- - ui.js           -- Handle parameter I/O and model download
- - qrhandler.js    -- QR Code creation and scanning
- - (jsloader.js    -- Just a helper for loading libraries that are not ES6 modules)
+To handle the different aspects of your interactive SVG model, SVG Builder offers these ES6 modules:
+ - `svgbuilder.js`   -- (re)creating your parametrized SVG design (`Drawable` base class, `PathD` helper class and other helpers)
+ - `ui.js`           -- Handle parameter I/O and model download
+ - `qrhandler.js`    -- QR Code creation and scanning
+ - (`jsloader.js`    -- Just a helper for loading libraries that are not ES6 modules)
 
 # Contributing
 
-All help and supportis welcome. :)
+All help and support is welcome. :)
 
 For example:
  - Show how you are using it
