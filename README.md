@@ -8,7 +8,7 @@ Similar to OpenSCAD's customizer, but more flexible on the UI side (In my unbias
 
 Currently, it's probably easiest to look at the catapult example and adapt it. See index.html, js/catapult.js and js/catapult.css.
 
-Different aspects of your interactive SVG model are handled using different ES6 modules:
+To handle the different aspects of your interactive SVG model, Svg Builder offers these ES6 modules:
  - svgbuilder.js   -- (re)creating your parametrized SVG design
  - ui.js           -- Handle parameter I/O and model download
  - qrhandler.js    -- QR Code creation and scanning
