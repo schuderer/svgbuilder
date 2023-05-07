@@ -31,6 +31,8 @@ class Bar extends sb.Drawable {
         this.makeProp('y', y)
         this.makeProp('w', width)
         this.makeProp('h', height)
+        this.makeProp('holeWidth', thickness * 1.8)
+        this.makeProp('holeHeight', thickness)
         this.createRootElem('g', {
             id: this.id
         })
@@ -38,7 +40,7 @@ class Bar extends sb.Drawable {
         this.elem.appendChild(this.outline)
 
         this.hole1 = this.createElem('rect', this.calcHole(0))
-        this.hole2 = this.createElem('rect', this.calcHole(this.w + thickness * 3))
+        this.hole2 = this.createElem('rect', this.calcHole(0))
         this.elem.appendChild(this.hole1)
         this.elem.appendChild(this.hole2)
 
@@ -49,10 +51,10 @@ class Bar extends sb.Drawable {
 
     calcHole(dx) {
         return {
-            x: this.x - thickness * 2 + dx,
-            y: (this.y + this.h / 2) - thickness / 1.5,
-            width: thickness,
-            height: thickness * 1.5,
+            x: this.x + dx,
+            y: (this.y + this.h / 2) - this.holeHeight / 2,// - (thickness / 1.5),
+            width: this.holeWidth,
+            height: this.holeHeight,
             ...cutProps
         }
     }
@@ -66,15 +68,15 @@ class Bar extends sb.Drawable {
         let d = new sb.PathD(this.x, this.y)
             .hLine(this.w)
             .vLine(this.h / 4)
-            .hLine(thickness * 1.8)
+            .hLine(this.holeWidth + 1.5)
             .halfCircle(this.h / 2)
-            .hLine(-thickness * 1.8)
+            .hLine(-(this.holeWidth + 1.5))
             .vLine(this.h / 4)
             .hLine(-this.w)
             .vLine(-this.h / 4)
-            .hLine(-thickness * 1.8)
+            .hLine(-(this.holeWidth + 1.5))
             .halfCircle(-this.h / 2)
-            .hLine(thickness * 1.8)
+            .hLine(this.holeWidth + 1.5)
             .close()
         this.outline.setAttribute('d', d)
 
@@ -105,8 +107,8 @@ class Bar extends sb.Drawable {
             this.outline.setAttribute('d', subtracted2)
         }
 
-        sb.setAttribs(this.hole1, this.calcHole(0))
-        sb.setAttribs(this.hole2, this.calcHole(this.w + thickness * 3))
+        sb.setAttribs(this.hole1, this.calcHole(-thickness - this.holeWidth + thickness*0.3))
+        sb.setAttribs(this.hole2, this.calcHole(this.w + thickness - thickness*0.3))
     }
 }
 
