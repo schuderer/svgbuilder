@@ -31,4 +31,4 @@ License of catapult design: [Creative Commons - Attribution - Non-Commercial](ht
 
 Catapult design based on this educational [Tension Catapult by Thingiverse user mfalk](https://www.thingiverse.com/thing:1403796) ([CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)) and its [no-glue derivative by SimpleAsWar](https://www.thingiverse.com/thing:4050155) ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)).
 
-Uses the libraries [Paper.js](http://paperjs.org/about/) for boolean operations,  [QRCode.js](https://github.com/davidshimjs/qrcodejs) for generating and [QR Scanner](https://github.com/nimiq/qr-scanner) for scanning them. 
+Uses the libraries [Paper.js](http://paperjs.org/about/) for boolean operations,  [QRCode.js](https://github.com/davidshimjs/qrcodejs) for generating QR Codes and [QR Scanner](https://github.com/nimiq/qr-scanner) for scanning them. 
