@@ -1,0 +1,11 @@
+.footer {
+    height: 3em;
+    font-size: 0.6em;
+    overflow: auto;
+}
+
+#portraitMessage {
+    display: none;
+    background-color: #ff9203;
+    padding: 0.6em;
+}
