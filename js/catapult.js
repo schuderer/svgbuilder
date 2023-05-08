@@ -3,7 +3,13 @@
 // Imports
 import * as sb from './svgbuilder.js'
 import { makeQRCode, canScan, scan } from './qrhandling.js'
-import { requireLandscape, getParamString, setParamsFromString, makeBookmarkable, download } from './ui.js'
+import {
+    requireLandscape,
+    getParamString,
+    setParamsFromString,
+    makeBookmarkable,
+    download
+} from './ui.js'
 
 const svg = document.querySelector("svg")
 const units = 'mm'
@@ -122,11 +128,11 @@ class Arm extends sb.Drawable {
         this.makeProp('aw', armWidth)
         this.makeProp('ro', armWidth) // Bucket outer radius
         this.makeProp('ri', armWidth / 2) // Bucket inner radius                
-        this.createRootElem('g', {
-            id: this.id
-        })
-        this.outline = this.createElem('path', cutProps)
-        this.elem.appendChild(this.outline)
+//        this.createRootElem('g', {
+//            id: this.id
+//        })
+        this.outline = this.createRootElem('path', cutProps)
+//        this.elem.appendChild(this.outline)
         this.bucket = this.createElem('circle', {
             cx: this.x,
             cy: this.y + this.ro,
@@ -250,17 +256,32 @@ class Side extends sb.Drawable {
         outline = outline.add(makeHole(this.ao + that.bh / 2 + 5))
 
         this.outline.setAttribute('d', outline)
+//        sb.resetTransform(this.elem)  // both variants are possible for this.elem
+        this.resetTransform()
         sb.resetTransform(this.outline)
-        sb.resetTransform(this.elem)
 
         this.textElem.innerHTML = this.text
         let textX = this.x + lPart * 2.5
 
         if (this.flip) {
             textX = this.x + lPart * 4.5
-            sb.mirrorX(this.outline, this.x + this.l / 2, this.y, true)
-            sb.rotate(this.elem, 180, this.x + this.l / 2, this.y, true)
-            sb.translate(this.elem, lPart * 2, -this.h - this.bh, true)
+            sb.mirrorX(this.outline, this.x + this.l / 2, this.y, false)
+//            sb.rotate(this.elem, 180, this.x + this.l / 2, this.y, false)
+//            sb.translate(this.elem, lPart * 2, -this.h - this.bh, false)
+            this.rotate(180, this.x + this.l / 2, this.y)
+            this.translate(lPart * 2, -this.h - this.bh)
+            if (this.text.includes(';')) {  // for fun: different strings per side
+                const [t1, t2] = this.text.split(';')
+                this.text = t2
+                this.update()
+                const other = sb.Drawable.all.filter(e => {
+                    return e instanceof Side && e.id != this.id
+                })
+                if (other.length === 1) {
+                    other[0].text = t1
+                    other[0].update()
+                }
+            }
         }
 
         sb.setAttribs(this.textElem, {
@@ -276,9 +297,9 @@ class Pins extends sb.Drawable {
         this.makeProp('x', x)
         this.makeProp('y', y)
         this.makeProp('l', length)
-        this.createRootElem('g', {})
-        this.path = this.createElem('path', cutProps)
-        this.elem.appendChild(this.path)
+//        this.createRootElem('g', {})
+        this.path = this.createRootElem('path', cutProps)
+//        this.elem.appendChild(this.path)
         this.makeTooltip('Keile zum Zusammenstecken')
     }
 
@@ -302,7 +323,7 @@ class Pins extends sb.Drawable {
 }
 
 function init() {
-    // Init is called automatically when page is loaded
+    // Init is called when page is completely loaded
 
     function updateThickness(evt) {
         thickness = Number(evt.target.value)
@@ -392,6 +413,21 @@ function init() {
 
     makeBookmarkable(allInputElems)
     requireLandscape(document.querySelector('#portraitMessage'))
+    
+    /*
+    Some tests for PathD construction from (almost) arbitrary objects:
+    // should succeed
+    console.log(new sb.PathD(arm))
+    console.log(new sb.PathD(new sb.PathD(239, 289)))
+    console.log(new sb.PathD(barNotch.elem.firstChild))
+    console.log(new sb.PathD("path"))  // DOM query selector
+    console.log(new sb.PathD("M 29 29"))
+    console.log(new sb.PathD(new paper.Path()))
+    // should fail
+//    console.log(new sb.PathD("]{}"))
+//    console.log(new sb.PathD(42))
+//    console.log(new sb.PathD(document.querySelector('input')))
+*/
 }
     
 window.addEventListener('load', init)
