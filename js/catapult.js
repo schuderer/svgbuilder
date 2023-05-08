@@ -65,6 +65,8 @@ class Bar extends sb.Drawable {
     }
 
     update() {
+        this.holeWidth = thickness * 1.8
+        this.holeHeight = thickness
         let d = new sb.PathD(this.x, this.y)
             .hLine(this.w)
             .vLine(this.h / 4)
