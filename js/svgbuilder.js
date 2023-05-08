@@ -385,6 +385,33 @@ export class Drawable {
         callback()
     }
 
+    // Join and keep outline of both paths, discard inner overlap
+    union(a, b = undefined) {
+        if (!b) { b = a; a = this }
+        return PathD(a).boolean(PathD(b), 'unite')
+    }
+    // Subtract other path from this path
+    difference(a, b = undefined) {
+        if (!b) { b = a; a = this }
+        // Reversed for more intuitive "a - b":
+        return PathD(b).boolean(PathD(a), 'subtract')
+    }
+    // Only keep path around intersecting area
+    intersection(a, b = undefined) {
+        if (!b) { b = a; a = this }
+        return PathD(a).boolean(PathD(b), 'intersect')
+    }
+    // Only keep path *other* than intersecting area
+    exclude(a, b = undefined) {
+        if (!b) { b = a; a = this }
+        return PathD(a).boolean(PathD(b), 'exclude')
+    }
+    // Only keep part of this that is enclosed by other
+    divide(a, b = undefined) {
+        if (!b) { b = a; a = this }
+        return PathD(a).boolean(PathD(b), 'divide')
+    }
+
     toString() {
         return `[${this.constructor.name} ${this.id}]`
     }
