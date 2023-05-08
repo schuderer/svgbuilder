@@ -230,11 +230,11 @@ export class PathD {
             console.debug(`PathD.getDStrFromAny() got a paper.Path (${something})`)
             return something.exportSVG().getAttribute('d')
         }
-        // SVG path?
-        if (something.tagName === 'path' && something.hasAttribute('d')) {
-            console.debug(`PathD.getDStrFromAny() got an SVG path (${something})`)
-            return something.getAttribute('d')
-        }
+        // SVG path? -- NO! This ignores transformations and surprises the user
+//        if (something.tagName === 'path' && something.hasAttribute('d')) {
+//            console.debug(`PathD.getDStrFromAny() got an SVG path (${something})`)
+//            return something.getAttribute('d')
+//        }
         // Drawable? Try its root element
         if (something instanceof Drawable) {
             console.debug(`PathD.getDStrFromAny() got a Drawable (${something})`)
@@ -272,10 +272,10 @@ export class PathD {
         return this.d.trim()
     }
     
-    toElem() {
-        const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-        elem.setAttribute('d', this.d)
-        return elem
+    elem() {
+        const e = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        e.setAttribute('d', this.d)
+        return e
     }
 }
 
@@ -367,7 +367,7 @@ export class Drawable {
             const that = this
             const callback = function (evt) {
                 const val = controlProp ? controlObj[controlProp] : controlObj.value
-                console.log(`Updating ${that}.${myPropName} to ${val} using ${controlObj}.${controlProp}`)
+                console.debug(`Updating ${that}.${myPropName} to ${val} using ${controlObj}.${controlProp}`)
                 that[myPropName] = val
                 that.update()
             }
@@ -412,6 +412,10 @@ export class Drawable {
         return PathD(a).boolean(PathD(b), 'divide')
     }
 
+    newPathD(...args) {
+        return new PathD(...args)
+    }
+
     toString() {
         return `[${this.constructor.name} ${this.id}]`
     }
@@ -422,12 +426,24 @@ for (const method of[setAttribs, resetTransform, appendTransform, scale, rotate,
     Drawable.prototype[method.name] = function (...args) {
         // forcing makeCopy=false for method
         if (args.length > 0 && typeof args[args.length-1] === 'boolean') {
-            console.log(args[args.length-1])
             args[args.length-1] = false
         }
         else {
             args.push(false)
         }
+        return method(this.elem, ...args)
+    }
+}
+for (const method of[scale, rotate, skew, translate, mirrorX, mirrorY]) {
+    Drawable.prototype[`${method.name}Copy`] = function (...args) {
+        // forcing makeCopy=true for method
+        if (args.length > 0 && typeof args[args.length-1] === 'boolean') {
+            args[args.length-1] = true
+        }
+        else {
+            args.push(true)
+        }
+        //console.log(`${method.name}Copy(${this.elem}, ${args})`)
         return method(this.elem, ...args)
     }
 }

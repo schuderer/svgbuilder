@@ -39,7 +39,7 @@ export function setParamsFromString(paramStr, inputElems=_knownInputElems) {
     if (params.length !== inputElems.length) {
         console.error(`Version mismatch: ${inputElems.length} controls vs. ${params.length} params`)
     }
-    console.log(`Setting parameters from string ${paramStr}`)
+    console.debug(`Setting parameters from string ${paramStr}`)
     let i = 0
     for (const input of inputElems) {
         const val = decodeURIComponent(params[i])
@@ -69,7 +69,7 @@ export function makeBookmarkable(inputElems, monitorEvent='change') {
         window.location.hash = `#${paramStr}`
     }
     for (const input of _knownInputElems) {
-        console.log(`Adding ${monitorEvent} event to ${input}`)
+        //console.log(`Adding ${monitorEvent} event to ${input}`)
         input.addEventListener(monitorEvent, callback)
     }
 }

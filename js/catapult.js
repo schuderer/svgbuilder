@@ -105,13 +105,13 @@ class Bar extends sb.Drawable {
                 width: 5 + 2,
                 height: depth / 2
             })
-            const union = sb.PathD.fromSvg(rect1).union(sb.PathD.fromSvg(rect2))
+            const union = this.newPathD(rect1).union(this.newPathD(rect2))
             this.notch.setAttribute('d', union)
 
             const notch2 = sb.mirrorX(this.notch, middle, this.y)
 
-            const subtracted = sb.PathD.fromSvg(this.outline).difference(sb.PathD.fromSvg(this.notch))
-            const subtracted2 = subtracted.difference(sb.PathD.fromSvg(notch2))
+            const subtracted = this.newPathD(this.outline).difference(this.newPathD(this.notch))
+            const subtracted2 = subtracted.difference(this.newPathD(notch2))
             this.outline.setAttribute('d', subtracted2)
         }
 
@@ -130,11 +130,7 @@ class Arm extends sb.Drawable {
         this.makeProp('aw', armWidth)
         this.makeProp('ro', armWidth) // Bucket outer radius
         this.makeProp('ri', armWidth / 2) // Bucket inner radius                
-//        this.createRootElem('g', {
-//            id: this.id
-//        })
         this.outline = this.createRootElem('path', cutProps)
-//        this.elem.appendChild(this.outline)
         this.bucket = this.createElem('circle', {
             cx: this.x,
             cy: this.y + this.ro,
@@ -171,17 +167,15 @@ class Arm extends sb.Drawable {
             .hLine(-thickness)
             .vLine(this.aw / 4)
             .hLine(-this.w / 2)
-            // todo
             .close()
 
-        // todo
-        this.outline.setAttribute('d', halfOutline) // to get path svg obj
-        const otherHalf = sb.mirrorX(this.outline, middle, this.y)
-        const fullOutline = halfOutline.union(sb.PathD.fromSvg(otherHalf))
-        const withOuterCircle = fullOutline.union(sb.PathD.fromSvg(this.bucket))
-        const withHole = withOuterCircle.difference(sb.PathD.fromSvg(this.hole))
+        this.elem.setAttribute('d', halfOutline) // to get path svg obj
+        const otherHalf = this.mirrorXCopy(middle, this.y)
+        const fullOutline = halfOutline.union(this.newPathD(otherHalf))
+        const withOuterCircle = fullOutline.union(this.newPathD(this.bucket))
+        const withHole = withOuterCircle.difference(this.newPathD(this.hole))
 
-        this.outline.setAttribute('d', withHole)
+        this.elem.setAttribute('d', withHole)
     }
 }
 
@@ -258,8 +252,7 @@ class Side extends sb.Drawable {
         outline = outline.add(makeHole(this.ao + that.bh / 2 + 5))
 
         this.outline.setAttribute('d', outline)
-//        sb.resetTransform(this.elem)  // both variants are possible for this.elem
-        this.resetTransform()
+        this.resetTransform()  // or sb.resetTransform(this.elem)
         sb.resetTransform(this.outline)
 
         this.textElem.innerHTML = this.text
@@ -268,8 +261,6 @@ class Side extends sb.Drawable {
         if (this.flip) {
             textX = this.x + lPart * 4.5
             sb.mirrorX(this.outline, this.x + this.l / 2, this.y, false)
-//            sb.rotate(this.elem, 180, this.x + this.l / 2, this.y, false)
-//            sb.translate(this.elem, lPart * 2, -this.h - this.bh, false)
             this.rotate(180, this.x + this.l / 2, this.y)
             this.translate(lPart * 2, -this.h - this.bh)
             if (this.text.includes(';')) {  // for fun: different strings per side
@@ -299,9 +290,7 @@ class Pins extends sb.Drawable {
         this.makeProp('x', x)
         this.makeProp('y', y)
         this.makeProp('l', length)
-//        this.createRootElem('g', {})
         this.path = this.createRootElem('path', cutProps)
-//        this.elem.appendChild(this.path)
         this.makeTooltip('Keile zum Zusammenstecken')
     }
 
