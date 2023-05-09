@@ -5,11 +5,17 @@
 
 function portraitCheck(elem) {
     window.setTimeout(_ => {
-        if (screen.orientation.type.includes('portrait')) {
-            elem.style.display = "block"
-        } else {
-            elem.style.display = "none"
+        let display = "none"
+        if (screen.orientation && screen.orientation.type) {
+            // Separate if statement because on desktop matchMedia gives false positives
+            if (screen.orientation.type.includes('portrait')) {
+                display = "block"
+            }
         }
+        else if (window.matchMedia("(orientation: portrait)").matches) {
+            display = "block"
+         }
+        elem.style.display = display
     }, 200)
 }
 
