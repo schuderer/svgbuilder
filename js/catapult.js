@@ -105,13 +105,13 @@ class Bar extends sb.Drawable {
                 width: 5 + 2,
                 height: depth / 2
             })
-            const union = this.newPathD(rect1).union(this.newPathD(rect2))
+            const union = this.asPathD(rect1).union(this.asPathD(rect2))
             this.notch.setAttribute('d', union)
 
             const notch2 = sb.mirrorX(this.notch, middle, this.y)
 
-            const subtracted = this.newPathD(this.outline).difference(this.newPathD(this.notch))
-            const subtracted2 = subtracted.difference(this.newPathD(notch2))
+            const subtracted = this.asPathD(this.outline).difference(this.asPathD(this.notch))
+            const subtracted2 = subtracted.difference(this.asPathD(notch2))
             this.outline.setAttribute('d', subtracted2)
         }
 
@@ -171,9 +171,9 @@ class Arm extends sb.Drawable {
 
         this.elem.setAttribute('d', halfOutline) // to get path svg obj
         const otherHalf = this.mirrorXCopy(middle, this.y)
-        const fullOutline = halfOutline.union(this.newPathD(otherHalf))
-        const withOuterCircle = fullOutline.union(this.newPathD(this.bucket))
-        const withHole = withOuterCircle.difference(this.newPathD(this.hole))
+        const fullOutline = halfOutline.union(this.asPathD(otherHalf))
+        const withOuterCircle = fullOutline.union(this.asPathD(this.bucket))
+        const withHole = withOuterCircle.difference(this.asPathD(this.hole))
 
         this.elem.setAttribute('d', withHole)
     }

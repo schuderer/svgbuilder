@@ -412,7 +412,7 @@ export class Drawable {
         return PathD(a).boolean(PathD(b), 'divide')
     }
 
-    newPathD(...args) {
+    asPathD(...args) {
         return new PathD(...args)
     }
 
