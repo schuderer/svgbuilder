@@ -2,11 +2,20 @@
 
 // Import dependencies
 import loadScript from './jsloader.js'
-loadScript('./js/lib/paper-full.min.js')  // Adds 'paper' to global namespace
+loadScript('./js/lib/paper-full.min.js') // Adds 'paper' to global namespace
 
+
+function _isStr(something) {
+    return (typeof something === 'string' || something instanceof String)
+}
+
+function _isValidSVGPath(dStr) {
+    const regex = /^[\s\r\n]*[Mm]\s*((\s*(-?\d+(\.\d+)?\s*,?\s*){2})|(\s*(-?\d+(\.\d+)?)\s*)){1}((\s*[Ll]\s*(-?\d+(\.\d+)?\s*,?\s*){2}\s*)|(\s*[Hh]\s*(-?\d+(\.\d+)?\s*)\s*)|(\s*[Vv]\s*(-?\d+(\.\d+)?\s*)\s*)|(\s*[Cc]\s*(-?\d+(\.\d+)?\s*,?\s*){6}\s*)|(\s*[Ss]\s*(-?\d+(\.\d+)?\s*,?\s*){4}\s*)|(\s*[Qq]\s*(-?\d+(\.\d+)?\s*,?\s*){4}\s*)|(\s*[Tt]\s*(-?\d+(\.\d+)?\s*,?\s*){2}\s*)|(\s*[Aa]\s*(-?\d+(\.\d+)?\s*,?\s*){7}\s*)|(\s*[Zz]\s*)?)*[\s\r\n]*$/
+    return regex.test(dStr);
+}
 
 export function ensureObj(queryOrObject) {
-    if (typeof queryOrObject === 'string' || queryOrObject instanceof String) {
+    if (_isStr(queryOrObject)) {
         queryOrObject = document.querySelector(queryOrObject)
     }
     return queryOrObject
@@ -30,57 +39,60 @@ export function appendTransform(svgObj, transformStr) {
     return svgObj
 }
 
-export function scale(svgObj, scaleX, scaleY, centerX = 0, centerY = 0, inplace = false) {
+export function scale(svgObj, scaleX, scaleY, centerX = 0, centerY = 0, makeCopy = true) {
     // For mirroring, use a scale factor of -1
     svgObj = ensureObj(svgObj)
-    if (!inplace) {
+    if (makeCopy) {
         svgObj = svgObj.cloneNode()
     }
     appendTransform(svgObj, `translate(${centerX}, ${centerY}) scale(${scaleX}, ${scaleY}) translate(${-centerX}, ${-centerY})`)
     return svgObj
 }
 
-export function rotate(svgObj, angle, centerX = 0, centerY = 0, inplace = false) {
+export function rotate(svgObj, angle, centerX = 0, centerY = 0, makeCopy = true) {
     svgObj = ensureObj(svgObj)
-    if (!inplace) {
+    if (makeCopy) {
         svgObj = svgObj.cloneNode()
     }
     appendTransform(svgObj, `translate(${centerX}, ${centerY}) rotate(${angle}) translate(${-centerX}, ${-centerY})`)
     return svgObj
 }
 
-export function skew(svgObj, skewX, skewY = 0, inplace = false) {
+export function skew(svgObj, skewX, skewY = 0, makeCopy = true) {
     svgObj = ensureObj(svgObj)
-    if (!inplace) {
+    if (makeCopy) {
         svgObj = svgObj.cloneNode()
     }
     appendTransform(svgObj, `skew(${skewX}, ${skewY})`)
     return svgObj
 }
 
-export function translate(svgObj, dx, dy, inplace = false) {
+export function translate(svgObj, dx, dy, makeCopy = true) {
     svgObj = ensureObj(svgObj)
-    if (!inplace) {
+    if (makeCopy) {
         svgObj = svgObj.cloneNode()
     }
     appendTransform(svgObj, `translate(${dx}, ${dy})`)
     return svgObj
 }
 
-export function mirrorX(svgObj, centerX = 0, centerY = 0, inplace = false) {
-    return scale(svgObj, -1, 1, centerX, centerY, inplace)
+export function mirrorX(svgObj, centerX = 0, centerY = 0, makeCopy = true) {
+    return scale(svgObj, -1, 1, centerX, centerY, makeCopy)
 }
 
-export function mirrorY(svgObj, centerX = 0, centerY = 0, inplace = false) {
-    return scale(svgObj, 1, -1, centerX, centerY, inplace)
+export function mirrorY(svgObj, centerX = 0, centerY = 0, makeCopy = true) {
+    return scale(svgObj, 1, -1, centerX, centerY, makeCopy)
 }
 
 export class PathD {
     // https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
-    constructor(startAtX, startAtY) {
+    constructor(startAtX_or_ObjToConstructFrom, startAtY) {
         this.d = ''
-        if (startAtX !== undefined && startAtY !== undefined) {
-            this.absMove(startAtX, startAtY)
+        if (startAtX_or_ObjToConstructFrom !== undefined && startAtY !== undefined) {
+            this.absMove(startAtX_or_ObjToConstructFrom, startAtY)
+        }
+        else if (startAtX_or_ObjToConstructFrom !== undefined && startAtY == undefined) {
+            this.d = PathD.getDStrFromAny(startAtX_or_ObjToConstructFrom)
         }
     }
 
@@ -154,26 +166,26 @@ export class PathD {
 
     // Join and keep outline of both paths, discard inner overlap
     union(other) {
-            return this.boolean(other, 'unite')
-        }
-        // Subtract other path from this path
+        return this.boolean(other, 'unite')
+    }
+    // Subtract other path from this path
     difference(other) {
-            return other.boolean(this, 'subtract')
-        }
-        // Only keep path around intersecting area
+        return other.boolean(this, 'subtract')
+    }
+    // Only keep path around intersecting area
     intersection(other) {
-            return this.boolean(other, 'intersect')
-        }
-        // Only keep path *other* than intersecting area
+        return this.boolean(other, 'intersect')
+    }
+    // Only keep path *other* than intersecting area
     exclude(other) {
-            return this.boolean(other, 'exclude')
-        }
-        // Only keep part of this that is enclosed by other
+        return this.boolean(other, 'exclude')
+    }
+    // Only keep part of this that is enclosed by other
     divide(other) {
         return this.boolean(other, 'divide')
     }
-
-    static fromSvg(svgObj) {
+    
+    static getDStrFromSvg(svgObj) {
         PathD._ensurePaperReady()
         svgObj = ensureObj(svgObj)
         paper.project.clear()
@@ -181,32 +193,24 @@ export class PathD {
             expandShapes: true, // expand everything to path items
             insert: true, // draw the path
         })
-        const paths = []
+        const dStrings = []
         for (const item of paper.project.activeLayer.children) {
             let d = ''
-            if (item instanceof paper.Path) {
+            if (item instanceof paper.Path || item instanceof paper.CompoundPath) {
                 d = item.exportSVG().getAttribute('d')
             } else {
-                throw Error(`PathD.fromSvg got passed a ${typeof item}: ${item}. Only shapes (paths, circles, rects, ...) are allowed`)
+                throw Error(`PathD.fromSvg got passed a(n) ${typeof item}: ${item}. Only shapes (paths, circles, rects, ...) are allowed`)
             }
-            paths.push(PathD.fromString(d))
-            if (paths.length > 1) {
+            dStrings.push(d)
+            if (dStrings.length > 1) {
                 console.warn(`PathD.fromSvg got more than one object. All but the first object will be ignored`)
             }
         }
-        return paths[0]
-            //                const name = svgObj.tagName.toLowerCase()
-            //                if (name === 'circle') {
-            //                    const x = Number(svgObj.getAttribute('cx'))
-            //                    const y = Number(svgObj.getAttribute('cy'))
-            //                    const r = Number(svgObj.getAttribute('r'))
-            //                    const obj = paper.Shape.Circle(
-            //                        new paper.Point(x, y),
-            //                        r
-            //                    )
-            //                    const path = obj.toPath(false).exportSVG()
-            //                    return PathD.fromString(path.getAttribute('d'))
-            //                }
+        return dStrings[0]
+}
+
+    static fromSvg(svgObj) {
+        return PathD.fromString(PathD.getDStrFromSvg(svgObj))
     }
 
     static fromString(dStr) {
@@ -214,9 +218,64 @@ export class PathD {
         p.d = dStr
         return p
     }
+    
+    static getDStrFromAny(something) {
+        // Already a PathD?
+        if (something instanceof PathD) {
+            console.debug(`PathD.getDStrFromAny() got a PathD (${something})`)
+            return something.d
+        }
+        // paper.js Path object?
+        if (something instanceof paper.Path) {
+            console.debug(`PathD.getDStrFromAny() got a paper.Path (${something})`)
+            return something.exportSVG().getAttribute('d')
+        }
+        // SVG path? -- NO! This ignores transformations and surprises the user
+//        if (something.tagName === 'path' && something.hasAttribute('d')) {
+//            console.debug(`PathD.getDStrFromAny() got an SVG path (${something})`)
+//            return something.getAttribute('d')
+//        }
+        // Drawable? Try its root element
+        if (something instanceof Drawable) {
+            console.debug(`PathD.getDStrFromAny() got a Drawable (${something})`)
+            return PathD.getDStrFromSvg(something.elem)
+        }
+        // Other SVG object?
+        try {
+            const d = PathD.getDStrFromSvg(something)
+            console.debug(`PathD.getDStrFromAny() got an SVG object (${something})`)
+            return d
+        }
+        catch (e) {
+            if (e instanceof DOMException) {
+                // Not an SVG element
+                // try whether something is a valid d string
+                if (_isValidSVGPath(something)) {                  
+                    console.debug(`PathD.getDStrFromAny() got a d string (${something})`)
+                    return something
+                }
+                else {
+                    throw Error(`PathD.fromAny() could not interpret object: ${something}.`)
+                }
+            }
+            else {
+                // Something else went wrong
+                throw e
+            }
+        }    }
+    
+    static fromAny(something) {
+        return PathD.fromString(PathD.getDStrFromAny(something))
+    }
 
     toString() {
         return this.d.trim()
+    }
+    
+    elem() {
+        const e = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        e.setAttribute('d', this.d)
+        return e
     }
 }
 
@@ -308,7 +367,7 @@ export class Drawable {
             const that = this
             const callback = function (evt) {
                 const val = controlProp ? controlObj[controlProp] : controlObj.value
-                console.log(`Updating ${that}.${myPropName} to ${val} using ${controlObj}.${controlProp}`)
+                console.debug(`Updating ${that}.${myPropName} to ${val} using ${controlObj}.${controlProp}`)
                 that[myPropName] = val
                 that.update()
             }
@@ -326,10 +385,69 @@ export class Drawable {
         callback()
     }
 
+    // Join and keep outline of both paths, discard inner overlap
+    union(a, b = undefined) {
+        if (!b) { b = a; a = this }
+        return PathD(a).boolean(PathD(b), 'unite')
+    }
+    // Subtract other path from this path
+    difference(a, b = undefined) {
+        if (!b) { b = a; a = this }
+        // Reversed for more intuitive "a - b":
+        return PathD(b).boolean(PathD(a), 'subtract')
+    }
+    // Only keep path around intersecting area
+    intersection(a, b = undefined) {
+        if (!b) { b = a; a = this }
+        return PathD(a).boolean(PathD(b), 'intersect')
+    }
+    // Only keep path *other* than intersecting area
+    exclude(a, b = undefined) {
+        if (!b) { b = a; a = this }
+        return PathD(a).boolean(PathD(b), 'exclude')
+    }
+    // Only keep part of this that is enclosed by other
+    divide(a, b = undefined) {
+        if (!b) { b = a; a = this }
+        return PathD(a).boolean(PathD(b), 'divide')
+    }
+
+    asPathD(...args) {
+        return new PathD(...args)
+    }
+
     toString() {
         return `[${this.constructor.name} ${this.id}]`
     }
 }
+// Make a couple helper functions also methods of Drawable.
+// No, I don't like this solution either, but I don't like repeating myself more.
+for (const method of[setAttribs, resetTransform, appendTransform, scale, rotate, skew, translate, mirrorX, mirrorY]) {
+    Drawable.prototype[method.name] = function (...args) {
+        // forcing makeCopy=false for method
+        if (args.length > 0 && typeof args[args.length-1] === 'boolean') {
+            args[args.length-1] = false
+        }
+        else {
+            args.push(false)
+        }
+        return method(this.elem, ...args)
+    }
+}
+for (const method of[scale, rotate, skew, translate, mirrorX, mirrorY]) {
+    Drawable.prototype[`${method.name}Copy`] = function (...args) {
+        // forcing makeCopy=true for method
+        if (args.length > 0 && typeof args[args.length-1] === 'boolean') {
+            args[args.length-1] = true
+        }
+        else {
+            args.push(true)
+        }
+        //console.log(`${method.name}Copy(${this.elem}, ${args})`)
+        return method(this.elem, ...args)
+    }
+}
+
 
 export class Group extends Drawable {
     constructor(drawablesToContain, attribs, parent = undefined) {
@@ -391,6 +509,7 @@ export class SvgProxy extends Drawable {
     }
 }
 
+// Export SVG markup string (units in mm)
 export function getSvgString(svgElem) {
     PathD._ensurePaperReady()
     paper.project.activeLayer.importSVG(svgElem, {

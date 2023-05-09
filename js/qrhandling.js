@@ -2,7 +2,7 @@
 
 // import dependencies
 import loadScript from './jsloader.js'
-loadScript('./js/lib/QRCode.js')  // Adds 'QRCode' to global namespace
+loadScript('./js/lib/qrcode.js')  // Adds 'QRCode' to global namespace
 import QrScanner from './lib/qr-scanner.min.js'
 
 

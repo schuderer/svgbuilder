@@ -3,7 +3,13 @@
 // Imports
 import * as sb from './svgbuilder.js'
 import { makeQRCode, canScan, scan } from './qrhandling.js'
-import { requireLandscape, getParamString, setParamsFromString, makeBookmarkable, download } from './ui.js'
+import {
+    requireLandscape,
+    getParamString,
+    setParamsFromString,
+    makeBookmarkable,
+    download
+} from './ui.js'
 
 const svg = document.querySelector("svg")
 const units = 'mm'
@@ -99,13 +105,13 @@ class Bar extends sb.Drawable {
                 width: 5 + 2,
                 height: depth / 2
             })
-            const union = sb.PathD.fromSvg(rect1).union(sb.PathD.fromSvg(rect2))
+            const union = this.asPathD(rect1).union(this.asPathD(rect2))
             this.notch.setAttribute('d', union)
 
             const notch2 = sb.mirrorX(this.notch, middle, this.y)
 
-            const subtracted = sb.PathD.fromSvg(this.outline).difference(sb.PathD.fromSvg(this.notch))
-            const subtracted2 = subtracted.difference(sb.PathD.fromSvg(notch2))
+            const subtracted = this.asPathD(this.outline).difference(this.asPathD(this.notch))
+            const subtracted2 = subtracted.difference(this.asPathD(notch2))
             this.outline.setAttribute('d', subtracted2)
         }
 
@@ -124,11 +130,7 @@ class Arm extends sb.Drawable {
         this.makeProp('aw', armWidth)
         this.makeProp('ro', armWidth) // Bucket outer radius
         this.makeProp('ri', armWidth / 2) // Bucket inner radius                
-        this.createRootElem('g', {
-            id: this.id
-        })
-        this.outline = this.createElem('path', cutProps)
-        this.elem.appendChild(this.outline)
+        this.outline = this.createRootElem('path', cutProps)
         this.bucket = this.createElem('circle', {
             cx: this.x,
             cy: this.y + this.ro,
@@ -165,17 +167,15 @@ class Arm extends sb.Drawable {
             .hLine(-thickness)
             .vLine(this.aw / 4)
             .hLine(-this.w / 2)
-            // todo
             .close()
 
-        // todo
-        this.outline.setAttribute('d', halfOutline) // to get path svg obj
-        const otherHalf = sb.mirrorX(this.outline, middle, this.y)
-        const fullOutline = halfOutline.union(sb.PathD.fromSvg(otherHalf))
-        const withOuterCircle = fullOutline.union(sb.PathD.fromSvg(this.bucket))
-        const withHole = withOuterCircle.difference(sb.PathD.fromSvg(this.hole))
+        this.elem.setAttribute('d', halfOutline) // to get path svg obj
+        const otherHalf = this.mirrorXCopy(middle, this.y)
+        const fullOutline = halfOutline.union(this.asPathD(otherHalf))
+        const withOuterCircle = fullOutline.union(this.asPathD(this.bucket))
+        const withHole = withOuterCircle.difference(this.asPathD(this.hole))
 
-        this.outline.setAttribute('d', withHole)
+        this.elem.setAttribute('d', withHole)
     }
 }
 
@@ -252,17 +252,29 @@ class Side extends sb.Drawable {
         outline = outline.add(makeHole(this.ao + that.bh / 2 + 5))
 
         this.outline.setAttribute('d', outline)
+        this.resetTransform()  // or sb.resetTransform(this.elem)
         sb.resetTransform(this.outline)
-        sb.resetTransform(this.elem)
 
         this.textElem.innerHTML = this.text
         let textX = this.x + lPart * 2.5
 
         if (this.flip) {
             textX = this.x + lPart * 4.5
-            sb.mirrorX(this.outline, this.x + this.l / 2, this.y, true)
-            sb.rotate(this.elem, 180, this.x + this.l / 2, this.y, true)
-            sb.translate(this.elem, lPart * 2, -this.h - this.bh, true)
+            sb.mirrorX(this.outline, this.x + this.l / 2, this.y, false)
+            this.rotate(180, this.x + this.l / 2, this.y)
+            this.translate(lPart * 2, -this.h - this.bh)
+            if (this.text.includes(';')) {  // for fun: different strings per side
+                const [t1, t2] = this.text.split(';')
+                this.text = t2
+                this.update()
+                const other = sb.Drawable.all.filter(e => {
+                    return e instanceof Side && e.id != this.id
+                })
+                if (other.length === 1) {
+                    other[0].text = t1
+                    other[0].update()
+                }
+            }
         }
 
         sb.setAttribs(this.textElem, {
@@ -278,9 +290,7 @@ class Pins extends sb.Drawable {
         this.makeProp('x', x)
         this.makeProp('y', y)
         this.makeProp('l', length)
-        this.createRootElem('g', {})
-        this.path = this.createElem('path', cutProps)
-        this.elem.appendChild(this.path)
+        this.path = this.createRootElem('path', cutProps)
         this.makeTooltip('Keile zum Zusammenstecken')
     }
 
@@ -304,7 +314,7 @@ class Pins extends sb.Drawable {
 }
 
 function init() {
-    // Init is called automatically when page is loaded
+    // Init is called when page is completely loaded
 
     function updateThickness(evt) {
         thickness = Number(evt.target.value)
@@ -394,6 +404,21 @@ function init() {
 
     makeBookmarkable(allInputElems)
     requireLandscape(document.querySelector('#portraitMessage'))
+    
+    /*
+    Some tests for PathD construction from (almost) arbitrary objects:
+    // should succeed
+    console.log(new sb.PathD(arm))
+    console.log(new sb.PathD(new sb.PathD(239, 289)))
+    console.log(new sb.PathD(barNotch.elem.firstChild))
+    console.log(new sb.PathD("path"))  // DOM query selector
+    console.log(new sb.PathD("M 29 29"))
+    console.log(new sb.PathD(new paper.Path()))
+    // should fail
+//    console.log(new sb.PathD("]{}"))
+//    console.log(new sb.PathD(42))
+//    console.log(new sb.PathD(document.querySelector('input')))
+*/
 }
     
 window.addEventListener('load', init)
