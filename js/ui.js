@@ -31,8 +31,13 @@ export function requireLandscape(elem) {
 // Optionally registered input elements
 let _knownInputElems = []
 
+
+function getVersion() {
+    return window.location.pathname.split('/').pop()
+}
+
 export function getParamString(inputElems=_knownInputElems) {
-    let data = ''
+    let data = getVersion() + '~'
     for (const input of inputElems) {
         const val = input.value.replace('~', '-')
         data += `${encodeURIComponent(val)}~`
@@ -42,8 +47,13 @@ export function getParamString(inputElems=_knownInputElems) {
 
 export function setParamsFromString(paramStr, inputElems=_knownInputElems) {
     const params = paramStr.split("~")
+    const requestedVersion = params.shift()
+    const currentVersion = getVersion()
+    if (requestedVersion !== currentVersion) {
+        throw new Error(`Version mismatch: requested ${requestedVersion} does not match current ${currentVersion}`)
+    }
     if (params.length !== inputElems.length) {
-        console.error(`Version mismatch: ${inputElems.length} controls vs. ${params.length} params`)
+        throw new Error(`Version mismatch: ${inputElems.length} controls vs. ${params.length} params`)
     }
     console.debug(`Setting parameters from string ${paramStr}`)
     let i = 0
