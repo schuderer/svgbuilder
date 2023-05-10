@@ -36,6 +36,22 @@ function getVersion() {
     return window.location.pathname.split('/').pop()
 }
 
+function openVersion(name) {
+    const curr = window.location.pathname.split('/')
+    curr.pop()  // remove file name
+    curr.push(name)
+    window.location.pathname = curr.join('/')
+}
+
+function checkVersion(requested) {
+    const current = getVersion()
+    if (requested !== current) {
+        console.error(`Version mismatch: requested version '${requested}' does not match current version '${current}'`)
+        const shouldSwitch = confirm(`Your settings are for '${requested}', but you are on '${current}'.\n\nSwitch to '${requested}?`)
+        if (shouldSwitch) openVersion(requested)
+    }
+}
+
 export function getParamString(inputElems=_knownInputElems) {
     let data = getVersion() + '~'
     for (const input of inputElems) {
@@ -47,11 +63,16 @@ export function getParamString(inputElems=_knownInputElems) {
 
 export function setParamsFromString(paramStr, inputElems=_knownInputElems) {
     const params = paramStr.split("~")
-    const requestedVersion = params.shift()
-    const currentVersion = getVersion()
-    if (requestedVersion !== currentVersion) {
-        throw new Error(`Version mismatch: requested ${requestedVersion} does not match current ${currentVersion}`)
+    const gotLegacyParams = isFinite(params[0])  // first param of catapult_v1.html is material thickness
+    let requestedVersion
+    if (gotLegacyParams) {
+        console.warn('got legacy params (without version) for catapult_v1')
+        requestedVersion = 'catapult_v1.html'
     }
+    else {
+        requestedVersion = params.shift()
+    }
+    checkVersion(requestedVersion)
     if (params.length !== inputElems.length) {
         throw new Error(`Version mismatch: ${inputElems.length} controls vs. ${params.length} params`)
     }
