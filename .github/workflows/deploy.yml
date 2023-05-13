@@ -1,0 +1,31 @@
+name: deploy
+run-name: Deploy after PR merge by ${{ github.actor }}
+on: 
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
+
+jobs:
+  upload_site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+#      - name: Install SSH client
+#        run: sudo apt-get update && sudo apt-get install -y openssh-client
+        
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa ${{ secrets.SFTP_SERVER }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to SFTP
+        run: |
+          echo "Uploading files to SFTP server..."
+          sftp -b - ${{ secrets.SFTP_USERNAME }}@${{ secrets.SFTP_SERVER }} <<EOF
+          put -r svgbuilder/* /
+          EOF
