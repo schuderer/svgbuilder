@@ -3,8 +3,8 @@ run-name: Deploy after PR merge by ${{ github.actor }}
 on: 
     push:
         branches: [ main ]
-    pull_request:
-        branches: [ main ]
+#    pull_request:
+#        branches: [ main ]
 
 jobs:
   upload_site:
