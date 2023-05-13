@@ -15,7 +15,10 @@ jobs:
         
 #      - name: Install SSH client
 #        run: sudo apt-get update && sudo apt-get install -y openssh-client
-        
+
+      - name: What have we here?
+        run: ls -la
+
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
