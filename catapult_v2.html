@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Katapult</title>
+    <meta charset="utf-8">
+    <script type="module" src="js/catapult.js"></script>
+    <link rel="stylesheet" href="css/svgbuilder.css">
+    <link rel="stylesheet" href="css/catapult.css">
+</head>
+
+<body>
+    <h2>Katapult konfigurieren</h2>
+    <div id="portraitMessage">Bitte Telefon auf die Seite drehen.</div>
+    <p id="controls">
+        <label><input type="number" id="dicke" min="2" max="4" value="3.8" style="width:3em" title="Materialstärke">mm</label>
+        <input type="range" id="laenge" min=150 max=300 value="210" title="Katapultlänge" />
+        <input type="range" id="breite" min=60 max=150 value="95" title="Katapultbreite" />
+        <input type="range" id="armLaenge" min=50 max=150 value="95" title="Armlänge" />
+        <input type="range" id="achse" min=-20 max=20 value="4" title="Achsenposition" />
+        <input type="text" id="name" value="Mein Name" size="15" title="Beschriftung Seitenteile (wenn verschiedene Beschriftungen gewünscht, diese mit Strichpunkt trennen)">
+        <button id="download" title="SVG-Datei herunterladen">Download</button>
+        <button id="qrcode" title="QR-Code anzeigen">QR-Code</button>
+        <button id="scan" title="Mit Kamera QR-Code scannen" style="display:none">Scanner</button>        
+    </p>
+    <svg viewbox="0 0 450 350">
+
+        <!-- put static objects here -->
+        
+    </svg>
+    <div class="footer">
+        License of design <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Creative Commons - Attribution - Non-Commercial</a>. License of source code: MIT License (2023 by Andreas Schuderer).
+        Design based on this educational <a href="https://www.thingiverse.com/thing:1403796" target="_blank">Tension Catapult by Thingiverse user mfalk</a> (<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a>) and its <a href="https://www.thingiverse.com/thing:4050155" target="_blank">no-glue derivative by SimpleAsWar</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY 4.0</a>).
+    </div>
+    <div id="overlay"></div>
+    <video id="video"></video>
+</body>
+
+</html>

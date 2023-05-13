@@ -75,7 +75,7 @@ export function scan(videoElem, dataCallback) {
                 returnDetailedScanResult: true,
                 onDecodeError: err => {
                     if (_stopping) return
-                    console.log(`Error: ${err}`)
+                    console.log(err)
                     // Unnecessary (there are errors all the time)
 //                    if (!_qrScanner.$overlay._timeout) {
 //                        const scanOverlay =_qrScanner.$overlay.firstChild
