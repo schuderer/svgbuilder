@@ -292,6 +292,7 @@ export class Drawable {
         this.id = 'obj' + Drawable.idSeq++
             this.eventListeners = {}
         this.numericProps = []
+        this.transformContexts = []
         Drawable.all.push(this)
     }
 
@@ -382,38 +383,61 @@ export class Drawable {
         } else {
             controlObj.addEventListener('input', callback)
         }
-        callback()
+        callback({ target: controlObj })
     }
 
     // Join and keep outline of both paths, discard inner overlap
     union(a, b = undefined) {
         if (!b) { b = a; a = this }
-        return PathD(a).boolean(PathD(b), 'unite')
+        return (new PathD(a)).boolean(new PathD(b), 'unite')
     }
     // Subtract other path from this path
     difference(a, b = undefined) {
         if (!b) { b = a; a = this }
         // Reversed for more intuitive "a - b":
-        return PathD(b).boolean(PathD(a), 'subtract')
+        return (new PathD(b)).boolean(new PathD(a), 'subtract')
     }
     // Only keep path around intersecting area
     intersection(a, b = undefined) {
         if (!b) { b = a; a = this }
-        return PathD(a).boolean(PathD(b), 'intersect')
+        return (new PathD(a)).boolean(new PathD(b), 'intersect')
     }
     // Only keep path *other* than intersecting area
     exclude(a, b = undefined) {
         if (!b) { b = a; a = this }
-        return PathD(a).boolean(PathD(b), 'exclude')
+        return (new PathD(a)).boolean(new PathD(b), 'exclude')
     }
     // Only keep part of this that is enclosed by other
     divide(a, b = undefined) {
         if (!b) { b = a; a = this }
-        return PathD(a).boolean(PathD(b), 'divide')
+        return (new PathD(a)).boolean(new PathD(b), 'divide')
     }
 
     asPathD(...args) {
         return new PathD(...args)
+    }
+
+    pushTransformContext() {
+        const currTransform = this.elem.getAttribute('transform') || ''
+        this.transformContexts.push(currTransform)
+    }
+
+    popTransformContext() {
+        const restoredTransform = this.transformContexts.pop()
+        if (restoredTransform)
+            this.elem.setAttribute('transform', restoredTransform)
+    }
+
+    static pushTransformContext() {
+        for (const able of Drawable.all) {
+            able.pushTransformContext()
+        }
+    }
+
+    static popTransformContext() {
+        for (const able of Drawable.all) {
+            able.pushTransformContext()
+        }
     }
 
     toString() {
@@ -431,6 +455,12 @@ for (const method of[setAttribs, resetTransform, appendTransform, scale, rotate,
         else {
             args.push(false)
         }
+//        const currTransform = this.elem.getAttribute('transform') || ''
+//        const result = method(this.elem, ...args)
+//        const newTransform = this.elem.getAttribute('transform') || ''
+//        if (currTransform.length > newTransform.length) {
+//            
+//        }
         return method(this.elem, ...args)
     }
 }

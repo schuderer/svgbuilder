@@ -102,7 +102,7 @@ export function makeBookmarkable(inputElems, monitorEvent='change') {
     // Update hash in future
     function callback(evt) {
         const paramStr = getParamString()
-        console.log(`Updating URL hash to #${paramStr}`)
+        console.debug(`Updating URL hash to #${paramStr}`)
         window.location.hash = `#${paramStr}`
     }
     for (const input of _knownInputElems) {
