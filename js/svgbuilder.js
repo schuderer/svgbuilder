@@ -9,10 +9,89 @@ function _isStr(something) {
     return (typeof something === 'string' || something instanceof String)
 }
 
-function _isValidSVGPath(dStr) {
-    const regex = /^[\s\r\n]*[Mm]\s*((\s*(-?\d+(\.\d+)?\s*,?\s*){2})|(\s*(-?\d+(\.\d+)?)\s*)){1}((\s*[Ll]\s*(-?\d+(\.\d+)?\s*,?\s*){2}\s*)|(\s*[Hh]\s*(-?\d+(\.\d+)?\s*)\s*)|(\s*[Vv]\s*(-?\d+(\.\d+)?\s*)\s*)|(\s*[Cc]\s*(-?\d+(\.\d+)?\s*,?\s*){6}\s*)|(\s*[Ss]\s*(-?\d+(\.\d+)?\s*,?\s*){4}\s*)|(\s*[Qq]\s*(-?\d+(\.\d+)?\s*,?\s*){4}\s*)|(\s*[Tt]\s*(-?\d+(\.\d+)?\s*,?\s*){2}\s*)|(\s*[Aa]\s*(-?\d+(\.\d+)?\s*,?\s*){7}\s*)|(\s*[Zz]\s*)?)*[\s\r\n]*$/
-    return regex.test(dStr);
+
+const validFlagEx = /^[01]/;
+const commaEx = /^(([\t\n\f\r\s]+,?[\t\n\f\r\s]*)|(,[\t\n\f\r\s]*))/;
+const validCommandEx = /^[\t\n\f\r\s]*([achlmqstvz])[\t\n\f\r\s]*/i;
+const validCoordinateEx = /^[+-]?((\d*\.\d+)|(\d+\.)|(\d+))(e[+-]?\d+)?/i;
+
+class PathParser {
+static validCommand = /^[\t\n\f\r\s]*([achlmqstvz])[\t\n\f\r\s]*/i;
+   static validFlag = /^[01]/;
+   static validCoordinate = /^[+-]?((\d*\.\d+)|(\d+\.)|(\d+))(e[+-]?\d+)?/i;
+   static validComma = /^(([\t\n\f\r\s]+,?[\t\n\f\r\s]*)|(,[\t\n\f\r\s]*))/;
+static pathGrammar = {
+      z: [],
+      h: [ validCoordinateEx ],
+      v: [ validCoordinateEx ],
+      m: [ validCoordinateEx, validCoordinateEx ],
+      l: [ validCoordinateEx, validCoordinateEx ],
+      t: [ validCoordinateEx, validCoordinateEx ],
+      s: [ validCoordinateEx, validCoordinateEx, validCoordinateEx, validCoordinateEx ],
+      q: [ validCoordinateEx, validCoordinateEx, validCoordinateEx, validCoordinateEx ],
+      c: [ validCoordinateEx, validCoordinateEx, validCoordinateEx, validCoordinateEx, validCoordinateEx, validCoordinateEx ],
+      a: [ validCoordinateEx, validCoordinateEx, validCoordinateEx, validFlagEx, validFlagEx, validCoordinateEx, validCoordinateEx ],
+   };
+
+static parseRaw( path ) {
+   let cursor = 0, parsedComponents = [];
+   while ( cursor < path.length ) {
+const match = path.slice( cursor ).match( this.validCommand );
+      if ( match !== null ) {
+         const command = match[ 1 ];
+         cursor += match[ 0 ].length;
+         const componentList = PathParser.parseComponents( command, path, cursor );
+         cursor = componentList[ 0 ];
+         parsedComponents = [ ...parsedComponents, ...componentList[1] ];
+      } else {
+throw new Error(  `Invalid path: first error at char ${ cursor }`  );
+      }
+   }
+   return parsedComponents;
 }
+
+static parseComponents( type, path, cursor ) {
+   const expectedCommands = this.pathGrammar[ type.toLowerCase() ];
+   const components = [];
+   while ( cursor <= path.length ) {
+      const component = [ type ];
+      for ( const regex of expectedCommands ) {
+         const match = path.slice( cursor ).match( regex );
+         if ( match !== null ) {
+            component.push( parseInt( match[ 0 ] ) );
+            cursor += match[ 0 ].length;
+            const nextSlice = path.slice( cursor ).match( this.validComma );
+            if ( nextSlice !== null ) cursor += nextSlice[ 0 ].length;
+         } else if ( component.length === 1 ) {
+            return [ cursor, components ];
+         } else {
+            throw new Error( `Invalid path: first error at char ${ cursor }` );
+         }
+      }
+      components.push( component );
+      if ( expectedCommands.length === 0 ) return [ cursor, components ];
+      if ( type === 'm' ) type = 'l';
+      if ( type === 'M' ) type = 'L';
+   }
+   throw new Error( `Invalid path: first error at char ${ cursor }` );
+}
+}
+
+// Validate SVG Path expression
+// Source: https://javascript.plainenglish.io/june-3-parsing-and-validating-svg-paths-with-regex-7bd0e245115
+function _isValidSVGPath(dStr) {
+//    const regex = /^[\s\r\n]*[Mm]\s*((\s*(-?\d+(\.\d+)?\s*,?\s*){2})|(\s*(-?\d+(\.\d+)?)\s*)){1}((\s*[Ll]\s*(-?\d+(\.\d+)?\s*,?\s*){2}\s*)|(\s*[Hh]\s*(-?\d+(\.\d+)?\s*)\s*)|(\s*[Vv]\s*(-?\d+(\.\d+)?\s*)\s*)|(\s*[Cc]\s*(-?\d+(\.\d+)?\s*,?\s*){6}\s*)|(\s*[Ss]\s*(-?\d+(\.\d+)?\s*,?\s*){4}\s*)|(\s*[Qq]\s*(-?\d+(\.\d+)?\s*,?\s*){4}\s*)|(\s*[Tt]\s*(-?\d+(\.\d+)?\s*,?\s*){2}\s*)|(\s*[Aa]\s*(-?\d+(\.\d+)?\s*,?\s*){7}\s*)|(\s*[Zz]\s*)?)*[\s\r\n]*$/
+//    const regex = /^[\s\r\n]*[Mm]\s*(-?\d+(\.\d+)?\s*,?\s*){2}(\s*[LlHhVvCcSsQqTtAaZz]\s*(-?\d+(\.\d+)?\s*,?\s*)*)*[\s\r\n]*$/
+//    return regex.test(dStr);
+    try {
+        PathParser.parseRaw(dStr)
+        return true
+    }
+    catch(e) {
+        return false
+    }
+}
+
 
 export function ensureObj(queryOrObject) {
     if (_isStr(queryOrObject)) {

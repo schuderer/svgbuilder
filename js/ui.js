@@ -82,14 +82,14 @@ export function setParamsFromString(paramStr, inputElems=_knownInputElems) {
         const val = decodeURIComponent(params[i])
         input.value = val
         input.dispatchEvent(new Event('input'))
-        input.dispatchEvent(new Event('change'))
+//        input.dispatchEvent(new Event('change'))
         i++
     }
 }
 
 // Keep URL anchor up-to-date with serialized parameters
-
-export function makeBookmarkable(inputElems, monitorEvent='change') {
+let _hashAnchorTimeout  // to slow down updates
+export function makeBookmarkable(inputElems, monitorEvent='input') {
     _knownInputElems = inputElems
     
     // Check current hash
@@ -100,14 +100,21 @@ export function makeBookmarkable(inputElems, monitorEvent='change') {
     }
     
     // Update hash in future
-    function callback(evt) {
+    function callback() {
         const paramStr = getParamString()
         console.debug(`Updating URL hash to #${paramStr}`)
         window.location.hash = `#${paramStr}`
     }
+    function delayedCallback() {
+        if (_hashAnchorTimeout) {
+            window.clearTimeout(_hashAnchorTimeout)
+        }
+        _hashAnchorTimeout = window.setTimeout(callback, 100)
+    }
+    
     for (const input of _knownInputElems) {
         //console.log(`Adding ${monitorEvent} event to ${input}`)
-        input.addEventListener(monitorEvent, callback)
+        input.addEventListener(monitorEvent, delayedCallback)
     }
 }
 
