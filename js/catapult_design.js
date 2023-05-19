@@ -128,8 +128,8 @@ class Arm extends sb.Drawable {
         this.makeProp('l', length)
         this.makeProp('w', width)
         this.makeProp('aw', armWidth)
-        this.makeProp('ro', armWidth) // Bucket outer radius
-        this.makeProp('ri', armWidth / 2) // Bucket inner radius                
+        this.makeProp('ro', armWidth * 0.75) // Bucket outer radius
+        this.makeProp('ri', armWidth / 3) // Bucket inner radius                
         this.outline = this.createRootElem('path', cutProps)
         this.bucket = this.createElem('circle', {
             cx: this.x,
@@ -402,6 +402,15 @@ function init() {
         })
     }
 
+    document.querySelector('#reset').addEventListener('click', evt => {
+        const sure = confirm('Hiermit werden alle Änderungen rückgängig gemacht.\nAlles löschen?')
+        if (sure) {
+            const nohash = window.location.href.split('#')[0]
+            window.location.href = nohash
+        }
+    })
+
+    
     makeBookmarkable(allInputElems)
     requireLandscape(document.querySelector('#portraitMessage'))
     

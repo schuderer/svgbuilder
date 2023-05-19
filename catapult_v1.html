@@ -4,12 +4,16 @@
 <head>
     <title>Katapult</title>
     <meta charset="utf-8">
-    <script type="module" src="js/catapult.js"></script>
+    <script type="module" src="js/catapult_design.js"></script>
     <link rel="stylesheet" href="css/svgbuilder.css">
-    <link rel="stylesheet" href="css/catapult.css">
+    <link rel="stylesheet" href="css/ui.css">
 </head>
 
 <body>
+    <p style="position:absolute;top=0;right:4px">
+        <a href="../">Zur Übersicht</a>
+    </p>
+
     <h2>Katapult konfigurieren</h2>
     <div id="portraitMessage">Bitte Telefon auf die Seite drehen.</div>
     <p id="controls">
@@ -22,6 +26,7 @@
         <button id="download" title="SVG-Datei herunterladen">Download</button>
         <button id="qrcode" title="QR-Code anzeigen">QR-Code</button>
         <button id="scan" title="Mit Kamera QR-Code scannen" style="display:none">Scanner</button>        
+        <button id="reset" title="Alle Werte zurücksetzen">Löschen</button>
     </p>
     <svg viewbox="0 0 450 350">
 

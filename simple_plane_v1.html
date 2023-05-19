@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Einfaches Flugzeugmodell</title>
+    <meta charset="utf-8">
+    <script type="module" src="js/simple_plane_design.js"></script>
+    <link rel="stylesheet" href="css/svgbuilder.css">
+    <link rel="stylesheet" href="css/ui.css">
+</head>
+
+<body>
+    <p style="position:absolute;top=0;right:4px">
+        <a href="../">Zur Übersicht</a>
+    </p>
+    <h2>Einfaches Flugzeugmodell konfigurieren</h2>
+    <div id="portraitMessage">Bitte Telefon auf die Seite drehen.</div>
+    <p id="controls">
+        <label><input type="number" id="thickness" min="1" max="4" value="1.1" style="width:3em" title="Materialstärke">mm</label>
+        <input type="range" id="length" min=50 max=250 value="150" title="Tragflächenlänge" />
+        <input type="range" id="width" min=10 max=100 value="45" title="Tragflächenbreite" />
+        <input type="range" id="angle" min=-15 max=70 value="5" title="Tragflächenwinkel" />
+        <input type="range" id="f_length" min=50 max=500 value="250" title="Rumpflänge" />
+        <input type="range" id="f_height" min=10 max=100 value="40" title="Rumpfhöhe" />
+        <input type="range" id="stab_length" min=30 max=125 value="75" title="Leitwerk-Länge" />
+        <input type="range" id="stab_width" min=10 max=100 value="35" title="Leitwerk-Breite" />
+        <input type="range" id="dihedral" min=0 max=45 value="25" title="V-Stellungs-Winkel der Tragflächen" />
+        <label><input type="number" id="girth" min="0" max="8" value="3" style="width:3em" title="Stabilität Flügeladapter"></label>
+        <label>Typ: <input type="checkbox" id="type1" checked="checked" title="Flügelbefestigung"/></label>
+        <button id="download" title="SVG-Datei herunterladen">Download</button>
+        <button id="qrcode" title="QR-Code anzeigen">QR-Code</button>
+        <button id="scan" title="Mit Kamera QR-Code scannen" style="display:none">Scanner</button>        
+        <button id="reset" title="Alle Werte zurücksetzen">Löschen</button>
+    </p>
+    <svg viewbox="0 0 450 350">
+
+        <!-- put static objects here -->
+        
+    </svg>
+    <div class="footer">
+        License of design <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">Creative Commons - Attribution</a>. License of source code: MIT License (2023 by Andreas Schuderer).
+    </div>
+    <div id="overlay"></div>
+    <video id="video"></video>
+</body>
+
+</html>
